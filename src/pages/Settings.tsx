@@ -1,0 +1,161 @@
+import { useEffect, useState } from 'react'
+import { Plus, Trash2, LogOut, Bell, BellOff, Tag } from 'lucide-react'
+import { useAuth } from '../context/AuthContext'
+import { useCategories } from '../hooks/useCategories'
+import { COLOR_PALETTE } from '../types/subscription'
+import {
+  requestNotificationPermission,
+  notificationsEnabled,
+} from '../utils/notifications'
+
+export function Settings() {
+  const { user, signOut } = useAuth()
+  const { categories, add, remove } = useCategories()
+  const [name, setName] = useState('')
+  const [color, setColor] = useState(COLOR_PALETTE[0])
+  const [notifOn, setNotifOn] = useState(false)
+
+  useEffect(() => {
+    void notificationsEnabled().then(setNotifOn)
+  }, [])
+
+  async function addCategory() {
+    const trimmed = name.trim()
+    if (!trimmed) return
+    await add({ name: trimmed, color })
+    setName('')
+    setColor(COLOR_PALETTE[(categories.length + 1) % COLOR_PALETTE.length])
+  }
+
+  async function enableNotifications() {
+    const granted = await requestNotificationPermission()
+    setNotifOn(granted)
+  }
+
+  return (
+    <div className="max-w-2xl space-y-6">
+      {/* Account */}
+      <div className="card p-5">
+        <h2 className="mb-4 text-sm font-semibold text-slate-200">Account</h2>
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            {user?.photoURL ? (
+              <img
+                src={user.photoURL}
+                alt=""
+                className="h-10 w-10 rounded-full border border-white/10"
+              />
+            ) : (
+              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-accent/15 text-sm font-semibold text-accent">
+                {user?.displayName?.[0] ?? user?.email?.[0] ?? '?'}
+              </div>
+            )}
+            <div className="min-w-0">
+              <div className="truncate text-sm font-medium text-slate-100">
+                {user?.displayName ?? 'Signed in'}
+              </div>
+              <div className="truncate text-xs text-slate-500">{user?.email}</div>
+            </div>
+          </div>
+          <button onClick={() => void signOut()} className="btn-ghost">
+            <LogOut size={16} /> Sign out
+          </button>
+        </div>
+      </div>
+
+      {/* Notifications */}
+      <div className="card p-5">
+        <h2 className="mb-1 text-sm font-semibold text-slate-200">Reminders</h2>
+        <p className="mb-4 text-xs text-slate-500">
+          Get notified before a subscription renews. On Android these fire in the
+          background; on the web they show while the app is open.
+        </p>
+        <button
+          onClick={enableNotifications}
+          disabled={notifOn}
+          className={notifOn ? 'btn-ghost' : 'btn-primary'}
+        >
+          {notifOn ? (
+            <>
+              <Bell size={16} /> Reminders enabled
+            </>
+          ) : (
+            <>
+              <BellOff size={16} /> Enable reminders
+            </>
+          )}
+        </button>
+      </div>
+
+      {/* Categories */}
+      <div className="card p-5">
+        <h2 className="mb-4 flex items-center gap-2 text-sm font-semibold text-slate-200">
+          <Tag size={16} /> Categories
+        </h2>
+
+        <div className="mb-4 flex flex-wrap items-center gap-2">
+          <input
+            className="input flex-1"
+            placeholder="New category name"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            onKeyDown={(e) => e.key === 'Enter' && addCategory()}
+          />
+          <div className="flex items-center gap-1.5">
+            {COLOR_PALETTE.slice(0, 6).map((c) => (
+              <button
+                key={c}
+                type="button"
+                onClick={() => setColor(c)}
+                className={`h-7 w-7 rounded-full ring-2 ring-offset-2 ring-offset-ink-800 transition ${
+                  color === c ? 'ring-white/80' : 'ring-transparent'
+                }`}
+                style={{ backgroundColor: c }}
+                aria-label={`Color ${c}`}
+              />
+            ))}
+          </div>
+          <button onClick={addCategory} className="btn-primary">
+            <Plus size={16} /> Add
+          </button>
+        </div>
+
+        {categories.length === 0 ? (
+          <p className="text-sm text-slate-500">
+            No categories yet. Add some to group your subscriptions.
+          </p>
+        ) : (
+          <div className="space-y-1.5">
+            {categories.map((c) => (
+              <div
+                key={c.id}
+                className="flex items-center justify-between rounded-lg px-2 py-2 hover:bg-white/[0.03]"
+              >
+                <span className="flex items-center gap-2.5 text-sm text-slate-200">
+                  <span
+                    className="h-3 w-3 rounded-full"
+                    style={{ backgroundColor: c.color }}
+                  />
+                  {c.name}
+                </span>
+                <button
+                  onClick={() => {
+                    if (confirm(`Delete category "${c.name}"?`)) void remove(c.id)
+                  }}
+                  className="rounded-lg p-1.5 text-slate-400 hover:bg-red-500/10 hover:text-red-300"
+                  aria-label="Delete category"
+                >
+                  <Trash2 size={15} />
+                </button>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
+      <p className="pb-4 text-center text-xs text-slate-600">
+        Subscriptions · your data stays private to your account
+      </p>
+    </div>
+  )
+}

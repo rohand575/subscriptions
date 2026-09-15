@@ -1,0 +1,17 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>Subscriptions</title>
+    <!--
+      GitHub Pages SPA fallback. GitHub Pages has no server-side routing, so a
+      deep link like /calendar returns this 404 page. We stash the requested path
+      in sessionStorage and redirect to the root, where main.tsx restores it.
+    -->
+    <script>
+      sessionStorage.setItem('spa-redirect', location.pathname + location.search + location.hash)
+      location.replace('/')
+    </script>
+  </head>
+  <body></body>
+</html>

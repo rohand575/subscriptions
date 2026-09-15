@@ -1,0 +1,38 @@
+{
+  "name": "subscriptions",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "description": "Personal subscription tracker across EUR and INR — web + Android",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc -b && vite build",
+    "preview": "vite preview",
+    "lint": "eslint .",
+    "cap:sync": "npm run build && cap sync",
+    "cap:android": "npm run build && cap sync && cap open android"
+  },
+  "dependencies": {
+    "date-fns": "^3.6.0",
+    "firebase": "^10.13.0",
+    "lucide-react": "^0.441.0",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "react-router-dom": "^6.26.2",
+    "recharts": "^2.12.7"
+  },
+  "devDependencies": {
+    "@capacitor/android": "^6.1.2",
+    "@capacitor/cli": "^6.1.2",
+    "@capacitor/core": "^6.1.2",
+    "@capacitor/local-notifications": "^6.1.0",
+    "@types/react": "^18.3.5",
+    "@types/react-dom": "^18.3.0",
+    "@vitejs/plugin-react": "^4.3.1",
+    "autoprefixer": "^10.4.20",
+    "postcss": "^8.4.45",
+    "tailwindcss": "^3.4.10",
+    "typescript": "^5.5.4",
+    "vite": "^5.4.3"
+  }
+}
