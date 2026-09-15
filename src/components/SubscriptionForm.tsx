@@ -96,8 +96,27 @@ export function SubscriptionForm({
   }
 
   return (
-    <Modal open={open} onClose={onClose} title={editing ? 'Edit subscription' : 'Add subscription'}>
-      <form onSubmit={handleSubmit} className="space-y-4">
+    <Modal
+      open={open}
+      onClose={onClose}
+      title={editing ? 'Edit subscription' : 'Add subscription'}
+      footer={
+        <div className="flex justify-end gap-2">
+          <button type="button" onClick={onClose} className="btn-ghost">
+            Cancel
+          </button>
+          <button
+            type="submit"
+            form="subscription-form"
+            disabled={saving}
+            className="btn-primary"
+          >
+            {saving ? 'Saving…' : editing ? 'Save changes' : 'Add subscription'}
+          </button>
+        </div>
+      }
+    >
+      <form id="subscription-form" onSubmit={handleSubmit} className="space-y-4">
         <div>
           <label className="label">Name</label>
           <input
@@ -130,6 +149,7 @@ export function SubscriptionForm({
               <input
                 required
                 type="number"
+                inputMode="decimal"
                 min="0"
                 step="0.01"
                 className="input pl-7"
@@ -230,6 +250,7 @@ export function SubscriptionForm({
             <label className="label">Remind me (days before)</label>
             <input
               type="number"
+              inputMode="numeric"
               min="0"
               max="60"
               className="input"
@@ -260,14 +281,6 @@ export function SubscriptionForm({
           />
         </div>
 
-        <div className="flex justify-end gap-2 pt-1">
-          <button type="button" onClick={onClose} className="btn-ghost">
-            Cancel
-          </button>
-          <button type="submit" disabled={saving} className="btn-primary">
-            {saving ? 'Saving…' : editing ? 'Save changes' : 'Add subscription'}
-          </button>
-        </div>
       </form>
     </Modal>
   )

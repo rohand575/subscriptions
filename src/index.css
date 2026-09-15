@@ -13,8 +13,17 @@
     height: 100%;
   }
 
+  /* Prevent any horizontal overflow from leaking a sideways scroll on mobile.
+     `clip` (not `hidden`) doesn't create a scroll container, so position:
+     sticky keeps working. Also stop iOS from resizing text in landscape. */
+  html {
+    overflow-x: clip;
+    -webkit-text-size-adjust: 100%;
+  }
+
   body {
     @apply bg-canvas text-ink-900 antialiased;
+    overflow-x: clip;
     -webkit-font-smoothing: antialiased;
     text-rendering: optimizeLegibility;
     /* honour device safe areas (notches, gesture bars) on Android/iOS */
@@ -44,15 +53,17 @@
     @apply border-black/[0.06] bg-white/70 backdrop-blur-xl backdrop-saturate-150;
   }
 
+  /* 16px text is required: iOS Safari auto-zooms any focused field smaller
+     than that. Keep controls at text-base to prevent the zoom. */
   .input {
-    @apply w-full rounded-xl border border-black/10 bg-white px-3.5 py-2.5 text-sm text-ink-900
+    @apply w-full rounded-xl border border-black/10 bg-white px-3.5 py-3 text-base text-ink-900
       placeholder:text-ink-400 outline-none transition
       focus:border-accent/60 focus:ring-4 focus:ring-accent/15;
   }
 
   .btn {
-    @apply inline-flex items-center justify-center gap-2 rounded-full px-4 py-2.5 text-sm font-medium
-      transition active:scale-[0.98] disabled:opacity-50 disabled:pointer-events-none;
+    @apply inline-flex touch-manipulation items-center justify-center gap-2 rounded-full px-4 py-2.5
+      text-sm font-medium transition active:scale-[0.98] disabled:opacity-50 disabled:pointer-events-none;
   }
 
   .btn-primary {
