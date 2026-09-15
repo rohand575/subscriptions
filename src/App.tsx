@@ -1,8 +1,11 @@
+import { useState } from 'react'
 import { Routes, Route, Navigate } from 'react-router-dom'
 import { useAuth } from './context/AuthContext'
 import { isFirebaseConfigured } from './lib/firebase'
+import { isBiometricEnabled } from './utils/biometric'
 import { AppShell } from './components/AppShell'
 import { Login } from './pages/Login'
+import { LockScreen } from './pages/LockScreen'
 import { SetupNotice } from './pages/SetupNotice'
 import { Dashboard } from './pages/Dashboard'
 import { CalendarPage } from './pages/Calendar'
@@ -18,6 +21,9 @@ function FullScreen({ children }: { children: React.ReactNode }) {
 
 export default function App() {
   const { user, loading } = useAuth()
+  // In-memory: resets on every cold launch, so Face ID is required each time
+  // the PWA is (re)opened.
+  const [unlocked, setUnlocked] = useState(false)
 
   if (!isFirebaseConfigured) return <SetupNotice />
 
@@ -30,6 +36,10 @@ export default function App() {
   }
 
   if (!user) return <Login />
+
+  if (isBiometricEnabled(user.uid) && !unlocked) {
+    return <LockScreen onUnlock={() => setUnlocked(true)} />
+  }
 
   return (
     <AppShell>

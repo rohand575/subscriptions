@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Plus, Trash2, LogOut, Bell, BellOff, Tag } from 'lucide-react'
+import { Plus, Trash2, LogOut, Bell, BellOff, Tag, ScanFace } from 'lucide-react'
 import { useAuth } from '../context/AuthContext'
 import { useCategories } from '../hooks/useCategories'
 import { COLOR_PALETTE, DEFAULT_CATEGORIES } from '../types/subscription'
@@ -7,6 +7,12 @@ import {
   requestNotificationPermission,
   notificationsEnabled,
 } from '../utils/notifications'
+import {
+  isBiometricSupported,
+  isBiometricEnabled,
+  enrollBiometric,
+  disableBiometric,
+} from '../utils/biometric'
 
 export function Settings() {
   const { user, signOut } = useAuth()
@@ -14,10 +20,16 @@ export function Settings() {
   const [name, setName] = useState('')
   const [color, setColor] = useState(COLOR_PALETTE[0])
   const [notifOn, setNotifOn] = useState(false)
+  const [bioSupported, setBioSupported] = useState(false)
+  const [bioOn, setBioOn] = useState(false)
+  const [bioBusy, setBioBusy] = useState(false)
+  const [bioError, setBioError] = useState<string | null>(null)
 
   useEffect(() => {
     void notificationsEnabled().then(setNotifOn)
-  }, [])
+    void isBiometricSupported().then(setBioSupported)
+    if (user) setBioOn(isBiometricEnabled(user.uid))
+  }, [user])
 
   async function addCategory() {
     const trimmed = name.trim()
@@ -37,6 +49,26 @@ export function Settings() {
   async function enableNotifications() {
     const granted = await requestNotificationPermission()
     setNotifOn(granted)
+  }
+
+  async function toggleBiometric() {
+    if (!user) return
+    setBioError(null)
+    if (bioOn) {
+      disableBiometric(user.uid)
+      setBioOn(false)
+      return
+    }
+    setBioBusy(true)
+    try {
+      const ok = await enrollBiometric(user.uid, user.email ?? user.displayName ?? 'Account')
+      setBioOn(ok)
+      if (!ok) setBioError('Setup was cancelled.')
+    } catch {
+      setBioError('Could not set up Face ID lock.')
+    } finally {
+      setBioBusy(false)
+    }
   }
 
   return (
@@ -93,6 +125,27 @@ export function Settings() {
           )}
         </button>
       </div>
+
+      {/* Face ID lock */}
+      {bioSupported && (
+        <div className="card p-5">
+          <h2 className="mb-1 text-sm font-semibold text-ink-800">App lock</h2>
+          <p className="mb-4 text-xs text-ink-400">
+            Require Face ID (or your device biometric) each time you open the app.
+            You stay signed in — this just keeps your subscriptions private if
+            someone else has your phone.
+          </p>
+          <button
+            onClick={() => void toggleBiometric()}
+            disabled={bioBusy}
+            className={bioOn ? 'btn-ghost' : 'btn-primary'}
+          >
+            <ScanFace size={16} />
+            {bioBusy ? 'Setting up…' : bioOn ? 'Face ID lock on' : 'Enable Face ID lock'}
+          </button>
+          {bioError && <p className="mt-3 text-sm text-red-500">{bioError}</p>}
+        </div>
+      )}
 
       {/* Categories */}
       <div className="card p-5">

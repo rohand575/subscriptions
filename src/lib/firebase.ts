@@ -1,5 +1,10 @@
 import { initializeApp } from 'firebase/app'
-import { getAuth, GoogleAuthProvider } from 'firebase/auth'
+import {
+  initializeAuth,
+  indexedDBLocalPersistence,
+  browserLocalPersistence,
+  GoogleAuthProvider,
+} from 'firebase/auth'
 import { getFirestore } from 'firebase/firestore'
 
 const firebaseConfig = {
@@ -18,6 +23,11 @@ export const isFirebaseConfigured = Boolean(
 
 const app = initializeApp(firebaseConfig)
 
-export const auth = getAuth(app)
+// Explicit persistence order so the session survives cold launches — notably in
+// iOS standalone (home-screen) PWAs, where the default can fall back to
+// in-memory and force a re-login every time the app is opened.
+export const auth = initializeAuth(app, {
+  persistence: [indexedDBLocalPersistence, browserLocalPersistence],
+})
 export const db = getFirestore(app)
 export const googleProvider = new GoogleAuthProvider()
