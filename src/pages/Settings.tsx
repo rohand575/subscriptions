@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react'
-import { Plus, Trash2, LogOut, Bell, BellOff, Tag, ScanFace } from 'lucide-react'
+import { Plus, Trash2, LogOut, Bell, BellOff, Tag, ScanFace, CalendarPlus } from 'lucide-react'
 import { useAuth } from '../context/AuthContext'
 import { useCategories } from '../hooks/useCategories'
+import { useSubscriptions } from '../hooks/useSubscriptions'
 import { COLOR_PALETTE, DEFAULT_CATEGORIES } from '../types/subscription'
 import {
   requestNotificationPermission,
@@ -13,10 +14,17 @@ import {
   enrollBiometric,
   disableBiometric,
 } from '../utils/biometric'
+import {
+  isCalendarConfigured,
+  isCalendarEnabled,
+  enableCalendarSync,
+  disableCalendarSync,
+} from '../utils/googleCalendar'
 
 export function Settings() {
   const { user, signOut } = useAuth()
   const { categories, add, remove } = useCategories()
+  const { syncAllToCalendar } = useSubscriptions()
   const [name, setName] = useState('')
   const [color, setColor] = useState(COLOR_PALETTE[0])
   const [notifOn, setNotifOn] = useState(false)
@@ -24,11 +32,17 @@ export function Settings() {
   const [bioOn, setBioOn] = useState(false)
   const [bioBusy, setBioBusy] = useState(false)
   const [bioError, setBioError] = useState<string | null>(null)
+  const [calOn, setCalOn] = useState(false)
+  const [calBusy, setCalBusy] = useState(false)
+  const [calMsg, setCalMsg] = useState<string | null>(null)
 
   useEffect(() => {
     void notificationsEnabled().then(setNotifOn)
     void isBiometricSupported().then(setBioSupported)
-    if (user) setBioOn(isBiometricEnabled(user.uid))
+    if (user) {
+      setBioOn(isBiometricEnabled(user.uid))
+      setCalOn(isCalendarEnabled(user.uid))
+    }
   }, [user])
 
   async function addCategory() {
@@ -68,6 +82,32 @@ export function Settings() {
       setBioError('Could not set up Face ID lock.')
     } finally {
       setBioBusy(false)
+    }
+  }
+
+  async function toggleCalendar() {
+    if (!user) return
+    setCalMsg(null)
+    if (calOn) {
+      disableCalendarSync(user.uid)
+      setCalOn(false)
+      setCalMsg('Sync turned off. Existing calendar events were left in place.')
+      return
+    }
+    setCalBusy(true)
+    try {
+      await enableCalendarSync(user.uid) // prompts Google consent
+      setCalOn(true)
+      const n = await syncAllToCalendar() // backfill existing subscriptions
+      setCalMsg(
+        n > 0
+          ? `Connected. Added ${n} renewal${n === 1 ? '' : 's'} to your calendar.`
+          : 'Connected. New subscriptions will be added to your calendar.',
+      )
+    } catch {
+      setCalMsg('Could not connect Google Calendar. Please try again.')
+    } finally {
+      setCalBusy(false)
     }
   }
 
@@ -144,6 +184,27 @@ export function Settings() {
             {bioBusy ? 'Setting up…' : bioOn ? 'Face ID lock on' : 'Enable Face ID lock'}
           </button>
           {bioError && <p className="mt-3 text-sm text-red-500">{bioError}</p>}
+        </div>
+      )}
+
+      {/* Google Calendar sync */}
+      {isCalendarConfigured && (
+        <div className="card p-5">
+          <h2 className="mb-1 text-sm font-semibold text-ink-800">Google Calendar</h2>
+          <p className="mb-4 text-xs text-ink-400">
+            Add each renewal to your Google Calendar as a recurring event with
+            reminders (5, 3, 2, 1 &amp; 0 days before). Your phone's Calendar then
+            notifies you — no app needed open.
+          </p>
+          <button
+            onClick={() => void toggleCalendar()}
+            disabled={calBusy}
+            className={calOn ? 'btn-ghost' : 'btn-primary'}
+          >
+            <CalendarPlus size={16} />
+            {calBusy ? 'Connecting…' : calOn ? 'Calendar sync on' : 'Connect Google Calendar'}
+          </button>
+          {calMsg && <p className="mt-3 text-sm text-ink-500">{calMsg}</p>}
         </div>
       )}
 

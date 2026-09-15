@@ -58,6 +58,8 @@ export interface Subscription {
   active: boolean
   /** Days before renewal to fire a reminder. 0 disables. */
   reminderDaysBefore: number
+  /** Id of the linked Google Calendar event, when calendar sync is on. */
+  calendarEventId?: string | null
   createdAt: Timestamp
   updatedAt: Timestamp
 }
@@ -65,7 +67,7 @@ export interface Subscription {
 /** Fields the user edits in the form (id/timestamps are managed automatically). */
 export type SubscriptionInput = Omit<
   Subscription,
-  'id' | 'createdAt' | 'updatedAt' | 'firstBillingDate'
+  'id' | 'createdAt' | 'updatedAt' | 'firstBillingDate' | 'calendarEventId'
 > & {
   /** ISO date string (yyyy-MM-dd) from the date input. */
   firstBillingDate: string

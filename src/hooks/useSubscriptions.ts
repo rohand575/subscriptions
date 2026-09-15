@@ -15,6 +15,23 @@ import { db } from '../lib/firebase'
 import { useAuth } from '../context/AuthContext'
 import type { Subscription, SubscriptionInput } from '../types/subscription'
 import { syncReminders } from '../utils/notifications'
+import {
+  isCalendarEnabled,
+  createRenewalEvent,
+  updateRenewalEvent,
+  deleteRenewalEvent,
+  type RenewalInfo,
+} from '../utils/googleCalendar'
+
+/** Map form input to the fields the calendar event needs. */
+function renewalInfo(input: SubscriptionInput): RenewalInfo {
+  return {
+    name: input.name,
+    firstBillingDate: new Date(input.firstBillingDate),
+    billingCycle: input.billingCycle,
+    reminderDaysBefore: input.reminderDaysBefore,
+  }
+}
 
 /**
  * Live-updating list of the signed-in user's subscriptions, plus CRUD helpers.
@@ -54,36 +71,102 @@ export function useSubscriptions() {
   const add = useCallback(
     async (input: SubscriptionInput) => {
       const { firstBillingDate, ...rest } = input
-      await addDoc(colRef(), {
+      const ref = await addDoc(colRef(), {
         ...rest,
         firstBillingDate: Timestamp.fromDate(new Date(firstBillingDate)),
         createdAt: serverTimestamp(),
         updatedAt: serverTimestamp(),
       })
+      // Best-effort: mirror as a Google Calendar event when sync is on.
+      if (user && input.active && isCalendarEnabled(user.uid)) {
+        try {
+          const eventId = await createRenewalEvent(renewalInfo(input))
+          await updateDoc(ref, { calendarEventId: eventId })
+        } catch (e) {
+          console.warn('Calendar sync (add) failed', e)
+        }
+      }
     },
-    [colRef],
+    [colRef, user],
   )
 
   const update = useCallback(
     async (id: string, input: SubscriptionInput) => {
       if (!user) throw new Error('Not signed in')
       const { firstBillingDate, ...rest } = input
-      await updateDoc(doc(db, 'users', user.uid, 'subscriptions', id), {
+      const docRef = doc(db, 'users', user.uid, 'subscriptions', id)
+      await updateDoc(docRef, {
         ...rest,
         firstBillingDate: Timestamp.fromDate(new Date(firstBillingDate)),
         updatedAt: serverTimestamp(),
       })
+
+      if (!isCalendarEnabled(user.uid)) return
+      const eventId = subscriptions.find((s) => s.id === id)?.calendarEventId ?? null
+      try {
+        if (!input.active) {
+          // Inactive subs shouldn't nag — drop any existing event.
+          if (eventId) {
+            await deleteRenewalEvent(eventId)
+            await updateDoc(docRef, { calendarEventId: null })
+          }
+        } else if (eventId) {
+          const newId = await updateRenewalEvent(eventId, renewalInfo(input))
+          if (newId !== eventId) await updateDoc(docRef, { calendarEventId: newId })
+        } else {
+          const newId = await createRenewalEvent(renewalInfo(input))
+          await updateDoc(docRef, { calendarEventId: newId })
+        }
+      } catch (e) {
+        console.warn('Calendar sync (update) failed', e)
+      }
     },
-    [user],
+    [user, subscriptions],
   )
 
   const remove = useCallback(
     async (id: string) => {
       if (!user) throw new Error('Not signed in')
+      const eventId = subscriptions.find((s) => s.id === id)?.calendarEventId
+      if (eventId && isCalendarEnabled(user.uid)) {
+        try {
+          await deleteRenewalEvent(eventId)
+        } catch (e) {
+          console.warn('Calendar sync (delete) failed', e)
+        }
+      }
       await deleteDoc(doc(db, 'users', user.uid, 'subscriptions', id))
     },
-    [user],
+    [user, subscriptions],
   )
 
-  return { subscriptions, loading, add, update, remove }
+  /**
+   * Create calendar events for active subs that don't have one yet — used to
+   * backfill existing subscriptions when the user first turns sync on.
+   * Returns how many events were created.
+   */
+  const syncAllToCalendar = useCallback(async () => {
+    if (!user || !isCalendarEnabled(user.uid)) return 0
+    let synced = 0
+    for (const s of subscriptions) {
+      if (!s.active || s.calendarEventId) continue
+      try {
+        const eventId = await createRenewalEvent({
+          name: s.name,
+          firstBillingDate: s.firstBillingDate.toDate(),
+          billingCycle: s.billingCycle,
+          reminderDaysBefore: s.reminderDaysBefore,
+        })
+        await updateDoc(doc(db, 'users', user.uid, 'subscriptions', s.id), {
+          calendarEventId: eventId,
+        })
+        synced++
+      } catch (e) {
+        console.warn('Calendar backfill failed for', s.name, e)
+      }
+    }
+    return synced
+  }, [user, subscriptions])
+
+  return { subscriptions, loading, add, update, remove, syncAllToCalendar }
 }
