@@ -23,6 +23,23 @@ export const CURRENCY_LOCALE: Record<Currency, string> = {
   INR: 'en-IN',
 }
 
+/** Each currency maps to the country its subscriptions belong to. */
+export const CURRENCY_REGION: Record<Currency, { country: string; flag: string }> = {
+  EUR: { country: 'Germany', flag: '🇩🇪' },
+  INR: { country: 'India', flag: '🇮🇳' },
+}
+
+/** Sensible starter categories offered on first run when none exist yet. */
+export const DEFAULT_CATEGORIES: { name: string; color: string }[] = [
+  { name: 'Entertainment', color: '#ff2d55' },
+  { name: 'Software', color: '#0071e3' },
+  { name: 'Utilities', color: '#34c759' },
+  { name: 'Health & Fitness', color: '#00c7be' },
+  { name: 'Food & Groceries', color: '#ff9500' },
+  { name: 'Shopping', color: '#af52de' },
+  { name: 'Finance', color: '#5856d6' },
+]
+
 /** A subscription document as stored in Firestore. */
 export interface Subscription {
   id: string

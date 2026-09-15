@@ -57,6 +57,11 @@ function toInput(sub: Subscription | null | undefined): SubscriptionInput {
   }
 }
 
+/** Cost as an editable string — blank for a brand-new subscription (no forced 0). */
+function costToText(sub: Subscription | null | undefined): string {
+  return sub ? String(sub.cost) : ''
+}
+
 export function SubscriptionForm({
   open,
   onClose,
@@ -66,6 +71,9 @@ export function SubscriptionForm({
 }: Props) {
   const [form, setForm] = useState<SubscriptionInput>(() => toInput(editing))
   const [tagsText, setTagsText] = useState((editing?.tags ?? []).join(', '))
+  // Cost/reminder are kept as raw text so the field can be emptied while typing
+  // (a plain number input would snap an empty box back to 0).
+  const [costText, setCostText] = useState(() => costToText(editing))
   const [saving, setSaving] = useState(false)
 
   // Re-seed the form whenever a different subscription is opened for editing.
@@ -73,6 +81,7 @@ export function SubscriptionForm({
   if (open && (editing?.id ?? null) !== seededFor) {
     setForm(toInput(editing))
     setTagsText((editing?.tags ?? []).join(', '))
+    setCostText(costToText(editing))
     setSeededFor(editing?.id ?? null)
   }
 
@@ -88,7 +97,14 @@ export function SubscriptionForm({
         .split(',')
         .map((t) => t.trim())
         .filter(Boolean)
-      await onSubmit({ ...form, cost: Number(form.cost) || 0, tags })
+      await onSubmit({
+        ...form,
+        cost: Number(costText) || 0,
+        reminderDaysBefore: Number.isFinite(form.reminderDaysBefore)
+          ? form.reminderDaysBefore
+          : 0,
+        tags,
+      })
       onClose()
     } finally {
       setSaving(false)
@@ -152,9 +168,10 @@ export function SubscriptionForm({
                 inputMode="decimal"
                 min="0"
                 step="0.01"
+                placeholder="0.00"
                 className="input pl-7"
-                value={form.cost}
-                onChange={(e) => set('cost', Number(e.target.value))}
+                value={costText}
+                onChange={(e) => setCostText(e.target.value)}
               />
             </div>
           </div>
@@ -254,8 +271,16 @@ export function SubscriptionForm({
               min="0"
               max="60"
               className="input"
-              value={form.reminderDaysBefore}
-              onChange={(e) => set('reminderDaysBefore', Number(e.target.value))}
+              value={Number.isFinite(form.reminderDaysBefore) ? form.reminderDaysBefore : ''}
+              onChange={(e) =>
+                set(
+                  'reminderDaysBefore',
+                  e.target.value === '' ? NaN : Number(e.target.value),
+                )
+              }
+              onBlur={(e) =>
+                set('reminderDaysBefore', e.target.value === '' ? 0 : Number(e.target.value))
+              }
             />
           </div>
           <div className="flex items-end">

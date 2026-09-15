@@ -7,8 +7,8 @@ import { SubscriptionCard } from '../components/SubscriptionCard'
 import { SubscriptionForm } from '../components/SubscriptionForm'
 import { CategoryChip } from '../components/CategoryChip'
 import { EmptyState } from '../components/EmptyState'
-import type { Subscription } from '../types/subscription'
-import { CURRENCIES } from '../types/subscription'
+import type { Subscription, Currency } from '../types/subscription'
+import { CURRENCIES, CURRENCY_REGION } from '../types/subscription'
 import {
   totalsByCurrency,
   formatMoney,
@@ -22,6 +22,7 @@ export function Dashboard() {
   const [formOpen, setFormOpen] = useState(false)
   const [editing, setEditing] = useState<Subscription | null>(null)
   const [filter, setFilter] = useState<string | null>(null)
+  const [region, setRegion] = useState<Currency | null>(null)
 
   const monthly = useMemo(() => totalsByCurrency(subscriptions, 'monthly'), [subscriptions])
   const catById = useMemo(
@@ -39,8 +40,26 @@ export function Dashboard() {
   )
 
   const visible = useMemo(
-    () => (filter ? subscriptions.filter((s) => s.categoryId === filter) : subscriptions),
-    [subscriptions, filter],
+    () =>
+      subscriptions.filter(
+        (s) =>
+          (!filter || s.categoryId === filter) &&
+          (!region || s.currency === region),
+      ),
+    [subscriptions, filter, region],
+  )
+
+  // Split the visible list into per-region groups so Germany (EUR) and India
+  // (INR) subscriptions read as clearly separate sections.
+  const groups = useMemo(
+    () =>
+      CURRENCIES.map((c) => ({
+        currency: c,
+        ...CURRENCY_REGION[c],
+        subs: visible.filter((s) => s.currency === c),
+        monthly: monthly[c],
+      })).filter((g) => g.subs.length > 0),
+    [visible, monthly],
   )
 
   const activeCount = subscriptions.filter((s) => s.active).length
@@ -61,9 +80,9 @@ export function Dashboard() {
         {CURRENCIES.map((c) => (
           <div key={c} className="card p-5">
             <div className="flex items-center gap-2 text-ink-500">
-              <Wallet size={16} />
+              <span className="text-base leading-none">{CURRENCY_REGION[c].flag}</span>
               <span className="text-xs font-medium uppercase tracking-wide">
-                {c} · monthly
+                {CURRENCY_REGION[c].country} · monthly
               </span>
             </div>
             <div className="mt-3 text-2xl font-semibold tabular-nums tracking-tight text-ink-900">
@@ -142,6 +161,25 @@ export function Dashboard() {
         </button>
       </div>
 
+      {/* Region filters */}
+      <div className="flex flex-wrap gap-2">
+        <CategoryChip
+          name="All regions"
+          color="#0071e3"
+          active={region === null}
+          onClick={() => setRegion(null)}
+        />
+        {CURRENCIES.map((c) => (
+          <CategoryChip
+            key={c}
+            name={`${CURRENCY_REGION[c].flag} ${CURRENCY_REGION[c].country}`}
+            color="#0071e3"
+            active={region === c}
+            onClick={() => setRegion(region === c ? null : c)}
+          />
+        ))}
+      </div>
+
       {/* Category filters */}
       {categories.length > 0 && (
         <div className="flex flex-wrap gap-2">
@@ -186,17 +224,35 @@ export function Dashboard() {
           }
         />
       ) : (
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-          {visible.map((s) => (
-            <SubscriptionCard
-              key={s.id}
-              sub={s}
-              category={s.categoryId ? catById[s.categoryId] : undefined}
-              onEdit={openEdit}
-              onDelete={(sub) => {
-                if (confirm(`Delete "${sub.name}"?`)) void remove(sub.id)
-              }}
-            />
+        <div className="space-y-6">
+          {groups.map((g) => (
+            <section key={g.currency} className="space-y-3">
+              <div className="flex items-center justify-between border-b border-black/[0.06] pb-2">
+                <h3 className="flex items-center gap-2 text-sm font-semibold text-ink-800">
+                  <span className="text-base leading-none">{g.flag}</span>
+                  {g.country}
+                  <span className="rounded-full bg-black/[0.04] px-2 py-0.5 text-[11px] font-medium text-ink-500">
+                    {g.subs.length}
+                  </span>
+                </h3>
+                <span className="text-xs tabular-nums text-ink-400">
+                  {formatMoney(g.monthly, g.currency)} / mo
+                </span>
+              </div>
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                {g.subs.map((s) => (
+                  <SubscriptionCard
+                    key={s.id}
+                    sub={s}
+                    category={s.categoryId ? catById[s.categoryId] : undefined}
+                    onEdit={openEdit}
+                    onDelete={(sub) => {
+                      if (confirm(`Delete "${sub.name}"?`)) void remove(sub.id)
+                    }}
+                  />
+                ))}
+              </div>
+            </section>
           ))}
         </div>
       )}

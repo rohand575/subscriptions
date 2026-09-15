@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { Plus, Trash2, LogOut, Bell, BellOff, Tag } from 'lucide-react'
 import { useAuth } from '../context/AuthContext'
 import { useCategories } from '../hooks/useCategories'
-import { COLOR_PALETTE } from '../types/subscription'
+import { COLOR_PALETTE, DEFAULT_CATEGORIES } from '../types/subscription'
 import {
   requestNotificationPermission,
   notificationsEnabled,
@@ -25,6 +25,13 @@ export function Settings() {
     await add({ name: trimmed, color })
     setName('')
     setColor(COLOR_PALETTE[(categories.length + 1) % COLOR_PALETTE.length])
+  }
+
+  async function addDefaults() {
+    const existing = new Set(categories.map((c) => c.name.toLowerCase()))
+    for (const c of DEFAULT_CATEGORIES) {
+      if (!existing.has(c.name.toLowerCase())) await add(c)
+    }
   }
 
   async function enableNotifications() {
@@ -121,9 +128,14 @@ export function Settings() {
         </div>
 
         {categories.length === 0 ? (
-          <p className="text-sm text-ink-400">
-            No categories yet. Add some to group your subscriptions.
-          </p>
+          <div className="space-y-3">
+            <p className="text-sm text-ink-400">
+              No categories yet. Add some to group your subscriptions.
+            </p>
+            <button onClick={addDefaults} className="btn-ghost">
+              <Plus size={16} /> Add starter categories
+            </button>
+          </div>
         ) : (
           <div className="space-y-1.5">
             {categories.map((c) => (
