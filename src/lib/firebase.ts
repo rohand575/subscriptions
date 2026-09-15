@@ -3,6 +3,7 @@ import {
   initializeAuth,
   indexedDBLocalPersistence,
   browserLocalPersistence,
+  browserPopupRedirectResolver,
   GoogleAuthProvider,
 } from 'firebase/auth'
 import { getFirestore } from 'firebase/firestore'
@@ -28,6 +29,9 @@ const app = initializeApp(firebaseConfig)
 // in-memory and force a re-login every time the app is opened.
 export const auth = initializeAuth(app, {
   persistence: [indexedDBLocalPersistence, browserLocalPersistence],
+  // Required: unlike getAuth(), initializeAuth() does not add a default
+  // resolver, so signInWithPopup would otherwise fail.
+  popupRedirectResolver: browserPopupRedirectResolver,
 })
 export const db = getFirestore(app)
 export const googleProvider = new GoogleAuthProvider()
