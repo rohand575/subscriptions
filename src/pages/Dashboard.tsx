@@ -60,29 +60,29 @@ export function Dashboard() {
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
         {CURRENCIES.map((c) => (
           <div key={c} className="card p-5">
-            <div className="flex items-center gap-2 text-slate-400">
+            <div className="flex items-center gap-2 text-ink-500">
               <Wallet size={16} />
               <span className="text-xs font-medium uppercase tracking-wide">
                 {c} · monthly
               </span>
             </div>
-            <div className="mt-3 text-2xl font-semibold tabular-nums text-slate-50">
+            <div className="mt-3 text-2xl font-semibold tabular-nums tracking-tight text-ink-900">
               {formatMoney(monthly[c], c)}
             </div>
-            <div className="mt-1 text-xs text-slate-500">
+            <div className="mt-1 text-xs text-ink-400">
               {formatMoney(monthly[c] * 12, c)} / year
             </div>
           </div>
         ))}
         <div className="card p-5">
-          <div className="flex items-center gap-2 text-slate-400">
+          <div className="flex items-center gap-2 text-ink-500">
             <Layers size={16} />
             <span className="text-xs font-medium uppercase tracking-wide">Active</span>
           </div>
-          <div className="mt-3 text-2xl font-semibold tabular-nums text-slate-50">
+          <div className="mt-3 text-2xl font-semibold tabular-nums tracking-tight text-ink-900">
             {activeCount}
           </div>
-          <div className="mt-1 text-xs text-slate-500">
+          <div className="mt-1 text-xs text-ink-400">
             {subscriptions.length} total
           </div>
         </div>
@@ -91,8 +91,8 @@ export function Dashboard() {
       {/* Upcoming renewals */}
       {upcoming.length > 0 && (
         <div className="card p-5">
-          <h2 className="mb-3 flex items-center gap-2 text-sm font-semibold text-slate-200">
-            <CalendarClock size={16} className="text-accent-soft" />
+          <h2 className="mb-3 flex items-center gap-2 text-sm font-semibold text-ink-800">
+            <CalendarClock size={16} className="text-accent" />
             Upcoming renewals
           </h2>
           <div className="space-y-1">
@@ -101,25 +101,25 @@ export function Dashboard() {
               return (
                 <div
                   key={s.id}
-                  className="flex items-center justify-between rounded-lg px-2 py-2 hover:bg-white/[0.03]"
+                  className="flex items-center justify-between rounded-xl px-2 py-2 hover:bg-black/[0.03]"
                 >
                   <div className="flex items-center gap-2.5">
                     <span
                       className="h-2.5 w-2.5 rounded-full"
                       style={{ backgroundColor: s.color }}
                     />
-                    <span className="text-sm text-slate-200">{s.name}</span>
-                    <span className="text-xs text-slate-500">
+                    <span className="text-sm text-ink-800">{s.name}</span>
+                    <span className="text-xs text-ink-400">
                       {format(nextRenewalDate(s), 'd MMM')}
                     </span>
                   </div>
                   <div className="flex items-center gap-3">
-                    <span className="text-sm tabular-nums text-slate-300">
+                    <span className="text-sm tabular-nums text-ink-700">
                       {formatMoney(s.cost, s.currency)}
                     </span>
                     <span
                       className={`w-14 text-right text-xs ${
-                        d <= 3 ? 'text-accent-soft' : 'text-slate-500'
+                        d <= 3 ? 'text-accent' : 'text-ink-400'
                       }`}
                     >
                       {d === 0 ? 'today' : `${d}d`}
@@ -134,7 +134,7 @@ export function Dashboard() {
 
       {/* Header + add */}
       <div className="flex items-center justify-between">
-        <h2 className="text-sm font-semibold text-slate-200">
+        <h2 className="text-sm font-semibold text-ink-800">
           All subscriptions
         </h2>
         <button onClick={openAdd} className="btn-primary">
@@ -147,7 +147,7 @@ export function Dashboard() {
         <div className="flex flex-wrap gap-2">
           <CategoryChip
             name="All"
-            color="#7c6bff"
+            color="#0071e3"
             active={filter === null}
             onClick={() => setFilter(null)}
           />
@@ -167,7 +167,7 @@ export function Dashboard() {
       {loading ? (
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           {[0, 1, 2, 3].map((i) => (
-            <div key={i} className="card h-28 animate-pulse bg-ink-800/40" />
+            <div key={i} className="card h-28 animate-pulse bg-black/[0.03]" />
           ))}
         </div>
       ) : visible.length === 0 ? (

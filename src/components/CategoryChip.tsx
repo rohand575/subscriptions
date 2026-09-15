@@ -13,8 +13,8 @@ export function CategoryChip({ name, color, onClick, active }: Props) {
       onClick={onClick}
       className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs font-medium transition ${
         active
-          ? 'border-white/20 bg-white/10 text-white'
-          : 'border-white/10 bg-white/[0.03] text-slate-300 hover:bg-white/[0.07]'
+          ? 'border-transparent bg-ink-900 text-white'
+          : 'border-black/[0.08] bg-white text-ink-700 shadow-soft hover:bg-black/[0.03]'
       }`}
     >
       <span className="h-2 w-2 rounded-full" style={{ backgroundColor: color }} />

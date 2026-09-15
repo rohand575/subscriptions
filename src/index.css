@@ -4,7 +4,7 @@
 
 @layer base {
   :root {
-    color-scheme: dark;
+    color-scheme: light;
   }
 
   html,
@@ -14,37 +14,44 @@
   }
 
   body {
-    @apply bg-ink-950 text-slate-200 antialiased;
+    @apply bg-canvas text-ink-900 antialiased;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
     /* honour device safe areas (notches, gesture bars) on Android/iOS */
     padding: env(safe-area-inset-top) env(safe-area-inset-right) 0 env(safe-area-inset-left);
   }
 
-  /* Subtle ambient gradient behind the app */
+  /* Very soft ambient tint behind the app */
   body::before {
     content: '';
     position: fixed;
     inset: 0;
     z-index: -1;
     background:
-      radial-gradient(60rem 60rem at 80% -10%, rgba(124, 107, 255, 0.12), transparent 60%),
-      radial-gradient(50rem 50rem at -10% 110%, rgba(124, 107, 255, 0.08), transparent 55%);
+      radial-gradient(50rem 50rem at 85% -10%, rgba(0, 113, 227, 0.06), transparent 60%),
+      radial-gradient(46rem 46rem at -10% 110%, rgba(88, 86, 214, 0.05), transparent 55%);
     pointer-events: none;
   }
 }
 
 @layer components {
   .card {
-    @apply rounded-2xl border border-white/5 bg-ink-800/70 shadow-glass backdrop-blur-xl;
+    @apply rounded-2xl border border-black/[0.06] bg-surface shadow-card;
+  }
+
+  /* Frosted translucent surface for sticky bars/nav */
+  .glass {
+    @apply border-black/[0.06] bg-white/70 backdrop-blur-xl backdrop-saturate-150;
   }
 
   .input {
-    @apply w-full rounded-xl border border-white/10 bg-ink-900/80 px-3.5 py-2.5 text-sm text-slate-100
-      placeholder:text-slate-500 outline-none transition
-      focus:border-accent/60 focus:ring-2 focus:ring-accent/20;
+    @apply w-full rounded-xl border border-black/10 bg-white px-3.5 py-2.5 text-sm text-ink-900
+      placeholder:text-ink-400 outline-none transition
+      focus:border-accent/60 focus:ring-4 focus:ring-accent/15;
   }
 
   .btn {
-    @apply inline-flex items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-sm font-medium
+    @apply inline-flex items-center justify-center gap-2 rounded-full px-4 py-2.5 text-sm font-medium
       transition active:scale-[0.98] disabled:opacity-50 disabled:pointer-events-none;
   }
 
@@ -53,24 +60,24 @@
   }
 
   .btn-ghost {
-    @apply btn border border-white/10 bg-white/[0.02] text-slate-200 hover:bg-white/[0.06];
+    @apply btn border border-black/10 bg-white text-ink-800 shadow-soft hover:bg-black/[0.03];
   }
 
   .label {
-    @apply mb-1.5 block text-xs font-medium uppercase tracking-wide text-slate-400;
+    @apply mb-1.5 block text-xs font-medium text-ink-500;
   }
 }
 
 /* Thin, unobtrusive scrollbars */
 * {
   scrollbar-width: thin;
-  scrollbar-color: rgba(255, 255, 255, 0.12) transparent;
+  scrollbar-color: rgba(0, 0, 0, 0.18) transparent;
 }
 *::-webkit-scrollbar {
   width: 8px;
   height: 8px;
 }
 *::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.12);
+  background: rgba(0, 0, 0, 0.18);
   border-radius: 999px;
 }

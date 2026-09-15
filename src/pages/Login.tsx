@@ -21,27 +21,27 @@ export function Login() {
 
   return (
     <div className="flex min-h-screen items-center justify-center p-6">
-      <div className="card w-full max-w-sm p-8 text-center">
-        <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-2xl bg-accent/15 text-accent shadow-glow">
+      <div className="card w-full max-w-sm p-8 text-center shadow-lift">
+        <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-2xl bg-accent text-white shadow-glow">
           <PieChart size={30} />
         </div>
-        <h1 className="text-2xl font-semibold text-slate-50">Subscriptions</h1>
-        <p className="mt-2 text-sm text-slate-400">
+        <h1 className="text-2xl font-semibold tracking-tight text-ink-900">Subscriptions</h1>
+        <p className="mt-2 text-sm text-ink-500">
           Track where your money goes — across € and ₹, all in one place.
         </p>
 
         <button
           onClick={handleSignIn}
           disabled={busy}
-          className="btn mt-8 w-full gap-3 border border-white/10 bg-white text-[15px] font-medium text-ink-900 hover:bg-slate-100"
+          className="btn mt-8 w-full gap-3 border border-black/10 bg-white text-[15px] font-medium text-ink-900 shadow-soft hover:bg-black/[0.03]"
         >
           <GoogleIcon />
           {busy ? 'Signing in…' : 'Continue with Google'}
         </button>
 
-        {error && <p className="mt-4 text-sm text-red-300">{error}</p>}
+        {error && <p className="mt-4 text-sm text-red-500">{error}</p>}
 
-        <p className="mt-6 text-xs text-slate-500">
+        <p className="mt-6 text-xs text-ink-400">
           Private to your account. Your data is never shared.
         </p>
       </div>

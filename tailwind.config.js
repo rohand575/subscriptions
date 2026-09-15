@@ -4,29 +4,47 @@ export default {
   theme: {
     extend: {
       fontFamily: {
-        sans: ['Inter', 'system-ui', 'sans-serif'],
+        sans: [
+          '-apple-system',
+          'BlinkMacSystemFont',
+          'SF Pro Display',
+          'SF Pro Text',
+          'Inter',
+          'system-ui',
+          'sans-serif',
+        ],
       },
       colors: {
-        // Near-black premium surface palette
+        // Apple-like light surfaces
+        canvas: '#f5f5f7',
+        surface: '#ffffff',
+        line: '#d2d2d7',
+        // Neutral text scale (Apple greys)
         ink: {
-          950: '#0a0a0c',
-          900: '#0f0f13',
-          800: '#16161c',
-          700: '#1e1e26',
-          600: '#2a2a35',
+          900: '#1d1d1f',
+          800: '#2a2a2c',
+          700: '#424245',
+          600: '#535357',
+          500: '#6e6e73',
+          400: '#86868b',
+          300: '#a1a1a6',
         },
         accent: {
-          DEFAULT: '#7c6bff',
-          soft: '#9d90ff',
-          dim: '#5a4fd6',
+          DEFAULT: '#0071e3',
+          soft: '#0077ed',
+          dim: '#0058b0',
         },
       },
       boxShadow: {
-        glass: '0 8px 40px -12px rgba(0, 0, 0, 0.6)',
-        glow: '0 0 40px -8px rgba(124, 107, 255, 0.45)',
+        // Soft layered shadows in the Apple style
+        soft: '0 1px 2px rgba(0, 0, 0, 0.04)',
+        card: '0 1px 2px rgba(0, 0, 0, 0.04), 0 12px 32px -18px rgba(0, 0, 0, 0.22)',
+        lift: '0 2px 6px rgba(0, 0, 0, 0.06), 0 24px 48px -24px rgba(0, 0, 0, 0.28)',
+        glow: '0 8px 22px -8px rgba(0, 113, 227, 0.5)',
       },
       borderRadius: {
         '2xl': '1.25rem',
+        '3xl': '1.75rem',
       },
       keyframes: {
         'fade-in': {
@@ -34,13 +52,13 @@ export default {
           '100%': { opacity: '1', transform: 'translateY(0)' },
         },
         'scale-in': {
-          '0%': { opacity: '0', transform: 'scale(0.96)' },
+          '0%': { opacity: '0', transform: 'scale(0.97)' },
           '100%': { opacity: '1', transform: 'scale(1)' },
         },
       },
       animation: {
-        'fade-in': 'fade-in 0.35s ease-out',
-        'scale-in': 'scale-in 0.2s ease-out',
+        'fade-in': 'fade-in 0.4s cubic-bezier(0.22, 1, 0.36, 1)',
+        'scale-in': 'scale-in 0.22s cubic-bezier(0.22, 1, 0.36, 1)',
       },
     },
   },

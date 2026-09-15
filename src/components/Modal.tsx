@@ -26,15 +26,15 @@ export function Modal({ open, onClose, title, children }: Props) {
   return (
     <div className="fixed inset-0 z-50 flex items-end justify-center sm:items-center">
       <div
-        className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+        className="absolute inset-0 bg-black/20 backdrop-blur-sm"
         onClick={onClose}
       />
-      <div className="card relative z-10 max-h-[92vh] w-full max-w-lg animate-scale-in overflow-y-auto rounded-b-none rounded-t-2xl sm:rounded-2xl">
-        <div className="sticky top-0 flex items-center justify-between border-b border-white/5 bg-ink-800/80 px-5 py-4 backdrop-blur-xl">
-          <h2 className="text-base font-semibold text-slate-100">{title}</h2>
+      <div className="card relative z-10 max-h-[92vh] w-full max-w-lg animate-scale-in overflow-y-auto rounded-b-none rounded-t-3xl shadow-lift sm:rounded-3xl">
+        <div className="glass sticky top-0 flex items-center justify-between border-b px-5 py-4">
+          <h2 className="text-base font-semibold tracking-tight text-ink-900">{title}</h2>
           <button
             onClick={onClose}
-            className="rounded-lg p-1.5 text-slate-400 hover:bg-white/5 hover:text-slate-100"
+            className="rounded-full p-1.5 text-ink-500 hover:bg-black/[0.05] hover:text-ink-900"
             aria-label="Close"
           >
             <X size={18} />

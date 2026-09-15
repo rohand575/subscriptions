@@ -62,16 +62,16 @@ export interface Category {
 
 export type CategoryInput = Omit<Category, 'id'>
 
-/** Palette used for subscriptions and categories. */
+/** Palette used for subscriptions and categories (Apple system colors). */
 export const COLOR_PALETTE = [
-  '#7c6bff',
-  '#ff6b8b',
-  '#4fd1c5',
-  '#f6ad55',
-  '#63b3ed',
-  '#b794f4',
-  '#68d391',
-  '#fc8181',
-  '#f6e05e',
-  '#a0aec0',
+  '#0071e3', // blue
+  '#ff2d55', // pink
+  '#00c7be', // teal
+  '#ff9500', // orange
+  '#5856d6', // indigo
+  '#af52de', // purple
+  '#34c759', // green
+  '#ff3b30', // red
+  '#ffcc00', // yellow
+  '#8e8e93', // gray
 ]

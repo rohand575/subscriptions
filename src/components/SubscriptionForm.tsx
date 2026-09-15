@@ -124,7 +124,7 @@ export function SubscriptionForm({
           <div>
             <label className="label">Cost</label>
             <div className="relative">
-              <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">
+              <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-ink-400">
                 {CURRENCY_SYMBOL[form.currency]}
               </span>
               <input
@@ -215,8 +215,8 @@ export function SubscriptionForm({
                 key={c}
                 type="button"
                 onClick={() => set('color', c)}
-                className={`h-7 w-7 rounded-full ring-2 ring-offset-2 ring-offset-ink-800 transition ${
-                  form.color === c ? 'ring-white/80' : 'ring-transparent'
+                className={`h-7 w-7 rounded-full ring-2 ring-offset-2 ring-offset-white transition ${
+                  form.color === c ? 'ring-ink-900/70' : 'ring-transparent'
                 }`}
                 style={{ backgroundColor: c }}
                 aria-label={`Color ${c}`}
@@ -238,7 +238,7 @@ export function SubscriptionForm({
             />
           </div>
           <div className="flex items-end">
-            <label className="flex cursor-pointer select-none items-center gap-2.5 pb-2.5 text-sm text-slate-200">
+            <label className="flex cursor-pointer select-none items-center gap-2.5 pb-2.5 text-sm text-ink-800">
               <input
                 type="checkbox"
                 className="h-4 w-4 accent-accent"

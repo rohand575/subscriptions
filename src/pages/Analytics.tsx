@@ -41,7 +41,7 @@ export function Analytics() {
       const cat = s.categoryId ? catById[s.categoryId] : undefined
       const id = cat?.id ?? 'uncat'
       const name = cat?.name ?? 'Uncategorized'
-      const color = cat?.color ?? '#64748b'
+      const color = cat?.color ?? '#a1a1a6'
       const prev = map.get(id)
       map.set(id, { name, color, value: (prev?.value ?? 0) + monthlyCost(s) })
     }
@@ -73,15 +73,15 @@ export function Analytics() {
   return (
     <div className="space-y-6">
       {/* Currency toggle */}
-      <div className="inline-flex rounded-xl border border-white/10 bg-white/[0.02] p-1">
+      <div className="inline-flex rounded-full border border-black/10 bg-white p-1 shadow-soft">
         {CURRENCIES.map((c) => (
           <button
             key={c}
             onClick={() => setCurrency(c)}
-            className={`rounded-lg px-4 py-1.5 text-sm font-medium transition ${
+            className={`rounded-full px-4 py-1.5 text-sm font-medium transition ${
               currency === c
-                ? 'bg-accent text-white'
-                : 'text-slate-400 hover:text-slate-200'
+                ? 'bg-accent text-white shadow-glow'
+                : 'text-ink-500 hover:text-ink-900'
             }`}
           >
             {CURRENCY_SYMBOL[c]} {c}
@@ -99,10 +99,10 @@ export function Analytics() {
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
           {/* Donut: spend by category */}
           <div className="card p-5">
-            <h2 className="mb-1 text-sm font-semibold text-slate-200">
+            <h2 className="mb-1 text-sm font-semibold text-ink-800">
               Monthly spend by category
             </h2>
-            <p className="mb-4 text-xs text-slate-500">
+            <p className="mb-4 text-xs text-ink-400">
               {formatMoney(total, currency)} / month total
             </p>
             <div className="h-64">
@@ -131,14 +131,14 @@ export function Analytics() {
             <div className="mt-3 space-y-1.5">
               {byCategory.map((c) => (
                 <div key={c.name} className="flex items-center justify-between text-sm">
-                  <span className="flex items-center gap-2 text-slate-300">
+                  <span className="flex items-center gap-2 text-ink-700">
                     <span
                       className="h-2.5 w-2.5 rounded-full"
                       style={{ backgroundColor: c.color }}
                     />
                     {c.name}
                   </span>
-                  <span className="tabular-nums text-slate-400">
+                  <span className="tabular-nums text-ink-500">
                     {formatMoney(c.value, currency)}
                   </span>
                 </div>
@@ -148,7 +148,7 @@ export function Analytics() {
 
           {/* Bar: top subscriptions */}
           <div className="card p-5">
-            <h2 className="mb-4 text-sm font-semibold text-slate-200">
+            <h2 className="mb-4 text-sm font-semibold text-ink-800">
               Top subscriptions (monthly)
             </h2>
             <div className="h-80">
@@ -158,10 +158,10 @@ export function Analytics() {
                   layout="vertical"
                   margin={{ left: 8, right: 16 }}
                 >
-                  <CartesianGrid horizontal={false} stroke="rgba(255,255,255,0.05)" />
+                  <CartesianGrid horizontal={false} stroke="rgba(0,0,0,0.06)" />
                   <XAxis
                     type="number"
-                    tick={{ fill: '#94a3b8', fontSize: 11 }}
+                    tick={{ fill: '#6e6e73', fontSize: 11 }}
                     tickFormatter={(v) => `${CURRENCY_SYMBOL[currency]}${v.toFixed(0)}`}
                     axisLine={false}
                     tickLine={false}
@@ -169,13 +169,13 @@ export function Analytics() {
                   <YAxis
                     type="category"
                     dataKey="name"
-                    tick={{ fill: '#cbd5e1', fontSize: 12 }}
+                    tick={{ fill: '#424245', fontSize: 12 }}
                     width={90}
                     axisLine={false}
                     tickLine={false}
                   />
                   <Tooltip
-                    cursor={{ fill: 'rgba(255,255,255,0.04)' }}
+                    cursor={{ fill: 'rgba(0,0,0,0.04)' }}
                     contentStyle={tooltipStyle}
                     formatter={(v: number) => formatMoney(v, currency)}
                   />
@@ -195,9 +195,10 @@ export function Analytics() {
 }
 
 const tooltipStyle = {
-  background: '#16161c',
-  border: '1px solid rgba(255,255,255,0.1)',
+  background: '#ffffff',
+  border: '1px solid rgba(0,0,0,0.1)',
   borderRadius: 12,
-  color: '#e2e8f0',
+  boxShadow: '0 12px 32px -16px rgba(0,0,0,0.25)',
+  color: '#1d1d1f',
   fontSize: 13,
 }

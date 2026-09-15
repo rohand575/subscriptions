@@ -70,26 +70,26 @@ export function CalendarPage() {
       <div className="card p-4 sm:p-5">
         {/* Month nav */}
         <div className="mb-4 flex items-center justify-between">
-          <h2 className="text-base font-semibold text-slate-100">
+          <h2 className="text-base font-semibold tracking-tight text-ink-900">
             {format(cursor, 'MMMM yyyy')}
           </h2>
           <div className="flex items-center gap-1">
             <button
               onClick={() => setCursor((c) => addMonths(c, -1))}
-              className="rounded-lg p-2 text-slate-400 hover:bg-white/5 hover:text-slate-100"
+              className="rounded-full p-2 text-ink-500 hover:bg-black/[0.05] hover:text-ink-900"
               aria-label="Previous month"
             >
               <ChevronLeft size={18} />
             </button>
             <button
               onClick={() => setCursor(startOfMonth(new Date()))}
-              className="rounded-lg px-3 py-1.5 text-xs font-medium text-slate-300 hover:bg-white/5"
+              className="rounded-full px-3 py-1.5 text-xs font-medium text-ink-700 hover:bg-black/[0.05]"
             >
               Today
             </button>
             <button
               onClick={() => setCursor((c) => addMonths(c, 1))}
-              className="rounded-lg p-2 text-slate-400 hover:bg-white/5 hover:text-slate-100"
+              className="rounded-full p-2 text-ink-500 hover:bg-black/[0.05] hover:text-ink-900"
               aria-label="Next month"
             >
               <ChevronRight size={18} />
@@ -102,7 +102,7 @@ export function CalendarPage() {
           {WEEKDAYS.map((d) => (
             <div
               key={d}
-              className="pb-2 text-center text-[11px] font-medium uppercase tracking-wide text-slate-500"
+              className="pb-2 text-center text-[11px] font-medium uppercase tracking-wide text-ink-400"
             >
               {d}
             </div>
@@ -122,15 +122,15 @@ export function CalendarPage() {
                 onClick={() => setSelected(day)}
                 className={`flex aspect-square flex-col items-center justify-start rounded-xl border p-1.5 text-sm transition sm:p-2 ${
                   isSel
-                    ? 'border-accent/60 bg-accent/10'
-                    : 'border-transparent hover:bg-white/[0.04]'
-                } ${inMonth ? '' : 'opacity-35'}`}
+                    ? 'border-accent/50 bg-accent/[0.08]'
+                    : 'border-transparent hover:bg-black/[0.04]'
+                } ${inMonth ? '' : 'opacity-40'}`}
               >
                 <span
                   className={`flex h-6 w-6 items-center justify-center rounded-full text-xs tabular-nums ${
                     isToday(day)
                       ? 'bg-accent font-semibold text-white'
-                      : 'text-slate-300'
+                      : 'text-ink-700'
                   }`}
                 >
                   {format(day, 'd')}
@@ -155,29 +155,29 @@ export function CalendarPage() {
       {/* Selected day detail */}
       {selected && (
         <div className="card p-5">
-          <h3 className="mb-3 text-sm font-semibold text-slate-200">
+          <h3 className="mb-3 text-sm font-semibold text-ink-800">
             {format(selected, 'EEEE, d MMMM')}
           </h3>
           {selectedSubs.length === 0 ? (
-            <p className="text-sm text-slate-500">No renewals on this day.</p>
+            <p className="text-sm text-ink-400">No renewals on this day.</p>
           ) : (
             <div className="space-y-1">
               {selectedSubs.map((s) => (
                 <div
                   key={s.id}
-                  className="flex items-center justify-between rounded-lg px-2 py-2 hover:bg-white/[0.03]"
+                  className="flex items-center justify-between rounded-xl px-2 py-2 hover:bg-black/[0.03]"
                 >
                   <div className="flex items-center gap-2.5">
                     <span
                       className="h-2.5 w-2.5 rounded-full"
                       style={{ backgroundColor: s.color }}
                     />
-                    <span className="text-sm text-slate-200">{s.name}</span>
-                    <span className="text-xs capitalize text-slate-500">
+                    <span className="text-sm text-ink-800">{s.name}</span>
+                    <span className="text-xs capitalize text-ink-400">
                       {s.billingCycle}
                     </span>
                   </div>
-                  <span className="text-sm tabular-nums text-slate-300">
+                  <span className="text-sm tabular-nums text-ink-700">
                     {formatMoney(s.cost, s.currency)}
                   </span>
                 </div>
