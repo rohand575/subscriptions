@@ -179,7 +179,7 @@ export async function createRenewalEvent(info: RenewalInfo): Promise<string> {
     headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
     body: JSON.stringify(buildEventResource(info)),
   })
-  if (!res.ok) throw new Error(`Calendar create failed: ${res.status}`)
+  if (!res.ok) throw new Error(`Calendar create failed: ${res.status} ${await res.text().catch(() => '')}`)
   const data = (await res.json()) as { id: string }
   return data.id
 }
@@ -196,7 +196,7 @@ export async function updateRenewalEvent(
     body: JSON.stringify(buildEventResource(info)),
   })
   if (res.status === 404 || res.status === 410) return createRenewalEvent(info)
-  if (!res.ok) throw new Error(`Calendar update failed: ${res.status}`)
+  if (!res.ok) throw new Error(`Calendar update failed: ${res.status} ${await res.text().catch(() => '')}`)
   const data = (await res.json()) as { id: string }
   return data.id
 }

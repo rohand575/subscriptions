@@ -142,12 +142,12 @@ export function useSubscriptions() {
 
   /**
    * Create calendar events for active subs that don't have one yet — used to
-   * backfill existing subscriptions when the user first turns sync on.
-   * Returns how many events were created.
+   * backfill existing subscriptions and as a manual "Sync now" retry.
+   * Returns counts plus the last error message (for surfacing to the user).
    */
   const syncAllToCalendar = useCallback(async () => {
-    if (!user || !isCalendarEnabled(user.uid)) return 0
-    let synced = 0
+    const result = { synced: 0, failed: 0, error: null as string | null }
+    if (!user || !isCalendarEnabled(user.uid)) return result
     for (const s of subscriptions) {
       if (!s.active || s.calendarEventId) continue
       try {
@@ -160,12 +160,14 @@ export function useSubscriptions() {
         await updateDoc(doc(db, 'users', user.uid, 'subscriptions', s.id), {
           calendarEventId: eventId,
         })
-        synced++
+        result.synced++
       } catch (e) {
+        result.failed++
+        result.error = e instanceof Error ? e.message : String(e)
         console.warn('Calendar backfill failed for', s.name, e)
       }
     }
-    return synced
+    return result
   }, [user, subscriptions])
 
   return { subscriptions, loading, add, update, remove, syncAllToCalendar }

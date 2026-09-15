@@ -98,14 +98,33 @@ export function Settings() {
     try {
       await enableCalendarSync(user.uid) // prompts Google consent
       setCalOn(true)
-      const n = await syncAllToCalendar() // backfill existing subscriptions
-      setCalMsg(
-        n > 0
-          ? `Connected. Added ${n} renewal${n === 1 ? '' : 's'} to your calendar.`
-          : 'Connected. New subscriptions will be added to your calendar.',
-      )
-    } catch {
-      setCalMsg('Could not connect Google Calendar. Please try again.')
+      const r = await syncAllToCalendar() // backfill existing subscriptions
+      if (r.error) {
+        setCalMsg(`Connected, but a sync failed: ${r.error}`)
+      } else if (r.synced > 0) {
+        setCalMsg(`Connected. Added ${r.synced} renewal${r.synced === 1 ? '' : 's'} to your calendar.`)
+      } else {
+        setCalMsg('Connected. Use "Sync now" to add your existing subscriptions.')
+      }
+    } catch (e) {
+      setCalMsg(`Could not connect: ${e instanceof Error ? e.message : 'unknown error'}`)
+    } finally {
+      setCalBusy(false)
+    }
+  }
+
+  async function syncNow() {
+    if (!user) return
+    setCalBusy(true)
+    setCalMsg(null)
+    try {
+      const r = await syncAllToCalendar()
+      if (r.error) setCalMsg(`Sync error: ${r.error}`)
+      else if (r.synced > 0)
+        setCalMsg(`Added ${r.synced} renewal${r.synced === 1 ? '' : 's'} to your calendar.`)
+      else setCalMsg('All caught up — every active subscription is already synced.')
+    } catch (e) {
+      setCalMsg(`Sync error: ${e instanceof Error ? e.message : 'unknown error'}`)
     } finally {
       setCalBusy(false)
     }
@@ -196,15 +215,22 @@ export function Settings() {
             reminders (5, 3, 2, 1 &amp; 0 days before). Your phone's Calendar then
             notifies you — no app needed open.
           </p>
-          <button
-            onClick={() => void toggleCalendar()}
-            disabled={calBusy}
-            className={calOn ? 'btn-ghost' : 'btn-primary'}
-          >
-            <CalendarPlus size={16} />
-            {calBusy ? 'Connecting…' : calOn ? 'Calendar sync on' : 'Connect Google Calendar'}
-          </button>
-          {calMsg && <p className="mt-3 text-sm text-ink-500">{calMsg}</p>}
+          <div className="flex flex-wrap gap-2">
+            <button
+              onClick={() => void toggleCalendar()}
+              disabled={calBusy}
+              className={calOn ? 'btn-ghost' : 'btn-primary'}
+            >
+              <CalendarPlus size={16} />
+              {calBusy ? 'Working…' : calOn ? 'Calendar sync on' : 'Connect Google Calendar'}
+            </button>
+            {calOn && (
+              <button onClick={() => void syncNow()} disabled={calBusy} className="btn-ghost">
+                Sync now
+              </button>
+            )}
+          </div>
+          {calMsg && <p className="mt-3 break-words text-sm text-ink-500">{calMsg}</p>}
         </div>
       )}
 
