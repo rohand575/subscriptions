@@ -1,8 +1,7 @@
 import { createContext, useContext, useEffect, useState, type ReactNode } from 'react'
 import {
   onAuthStateChanged,
-  signInWithRedirect,
-  getRedirectResult,
+  signInWithPopup,
   signOut as fbSignOut,
   type User,
 } from 'firebase/auth'
@@ -26,10 +25,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setLoading(false)
       return
     }
-    // Surface any error from a completed redirect sign-in. onAuthStateChanged
-    // below picks up the resulting (or restored) user, so we only need this for
-    // error visibility — swallow silently otherwise.
-    void getRedirectResult(auth).catch(() => {})
     const unsub = onAuthStateChanged(auth, (u) => {
       setUser(u)
       setLoading(false)
@@ -38,9 +33,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [])
 
   async function signInWithGoogle() {
-    // Redirect (not popup): popups are unreliable in iOS standalone PWAs and
-    // don't share Google's cookies, which forces a full re-login every time.
-    await signInWithRedirect(auth, googleProvider)
+    // Popup (not redirect): the app runs on a custom domain while Firebase's
+    // authDomain is *.firebaseapp.com, and cross-domain redirect sign-in is
+    // blocked by browser storage partitioning. This one-time popup establishes
+    // the session; explicit persistence (see firebase.ts) then keeps it.
+    await signInWithPopup(auth, googleProvider)
   }
 
   async function signOut() {
